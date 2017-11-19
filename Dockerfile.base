@@ -1,0 +1,19 @@
+FROM selenium/standalone-chrome:3.7.1-argon
+
+# Performs the following steps:
+# 1. Install DynamicIP CA Certificate (see: https://www.dynamicip.com/ssl)
+# 2. Cleanup
+
+# Note:
+# Java 1.8 is already installed in the base image.
+
+RUN cd /home/seluser/ && \
+    sudo apt-get update && \
+    sudo apt-get install curl libnss3-tools -y && \
+    curl -O https://downloads.dynamicip.com/ca.crt && \
+    mkdir -p /home/seluser/.pki/nssdb && \
+    chmod -R 0700 /home/seluser/.pki && \
+    certutil -d sql:/home/seluser/.pki/nssdb -N --empty-password && \
+    certutil -d sql:/home/seluser/.pki/nssdb -A -t "C,," -n "DynamicIP CA" -i ca.crt && \
+    sudo apt-get purge curl libnss3-tools -y && \
+    sudo rm -rf /var/lib/apt/lists/*
